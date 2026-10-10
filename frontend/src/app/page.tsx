@@ -20,18 +20,18 @@ export default function Home() {
           <p className="mt-6 max-w-xl text-lg text-muted">{PRODUCT.heroBody}</p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
-              href="/create"
+              href="/onboard"
               className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-5 py-3 text-sm font-medium text-ink-950 transition-colors hover:bg-accent-400"
             >
               {PRODUCT.createCta}
               <ArrowRight className="size-4" />
             </Link>
             <Link
-              href="/activity"
+              href="/dashboard"
               className="inline-flex items-center gap-2 rounded-lg border border-line bg-ink-850 px-5 py-3 text-sm font-medium transition-colors hover:border-ink-600"
             >
               <ArrowRight className="size-4" />
-              View all requests
+              Create your tip page
             </Link>
           </div>
         </div>
@@ -43,20 +43,20 @@ export default function Home() {
           {[
             {
               step: "01",
-              title: "Create a request",
+              title: "Create your tip page",
               body: "Connect your wallet, set the amount, description and recipient, and sign once.",
               icon: PencilLine,
             },
             {
               step: "02",
-              title: "Share the link",
-              body: "Every request gets a /pay/<id> link. Send it anywhere.",
+              title: "Share your tip page",
+              body: "Get your /c/[username] link and share it anywhere.",
               icon: Share2,
             },
             {
               step: "03",
-              title: "Get paid on-chain",
-              body: "The payer connects a wallet and pays. The contract marks it Paid and it shows in the feed.",
+              title: "Receive tips on-chain",
+              body: "Supporters connect their wallet, choose an amount, leave a message and send BOT directly to you.",
               icon: Wallet,
             },
           ].map((s) => {

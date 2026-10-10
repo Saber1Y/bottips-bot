@@ -12,11 +12,11 @@ export function Header() {
             <img src="/wordmark.png" alt="BotTips wordmark" className="h-5" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-muted sm:flex">
-            <Link href="/create" className="transition-colors hover:text-white">
-              Create
+            <Link href="/onboard" className="transition-colors hover:text-white">
+              Create tip page
             </Link>
-            <Link href="/activity" className="transition-colors hover:text-white">
-              Activity
+            <Link href="/dashboard" className="transition-colors hover:text-white">
+              Dashboard
             </Link>
           </nav>
         </div>
