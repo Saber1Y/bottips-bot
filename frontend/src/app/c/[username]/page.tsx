@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useAccount, useChainId, useSendTransaction } from "wagmi";
+import { useAccount, useChainId, useSendTransaction, useWriteContract } from "wagmi";
 import { parseEther } from "viem";
+import { payAbi } from "@/lib/abi/contractAbi";
+import { getNetwork } from "@/config/contracts";
 import { ArrowRight, Send, CheckCircle2 } from "lucide-react";
 import { Button, Card, Input, Textarea } from "@/components/ui";
 import { botTestnet, botMainnet } from "@/config/chains";
@@ -29,7 +31,7 @@ export default function TipPage() {
   const username = params?.username as string;
   const { address: myAddr, isConnected } = useAccount();
   const chainId = useChainId();
-  const { sendTransactionAsync, isPending } = useSendTransaction();
+  const { writeContractAsync, isPending } = useWriteContract();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [amount, setAmount] = useState("5");
   const [custom, setCustom] = useState("");
@@ -62,8 +64,12 @@ export default function TipPage() {
     setErr(null);
     try {
       const value = parseEther(activeAmount);
-      const hash = await sendTransactionAsync({
-        to: profile.address as `0x${string}`,
+      const contracts = getNetwork(chainId);
+      const hash = await writeContractAsync({
+        address: contracts.contract as `0x${string}`,
+        abi: payAbi,
+        functionName: "tip",
+        args: [profile.address as `0x${string}`, message.trim()],
         value,
       });
       setTxHash(hash);

@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { Button, Card, Input, Textarea } from "@/components/ui";
+import { getNetwork } from "@/config/contracts";
+import { payAbi } from "@/lib/abi/contractAbi";
 import { copy } from "@/lib/utils";
 
 type Profile = {
@@ -25,6 +27,9 @@ function slugify(s: string) {
 
 export default function OnboardPage() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { writeContractAsync, data: txHash, isPending } = useWriteContract();
+  const { isSuccess: txSuccess } = useWaitForTransactionReceipt({ hash: txHash });
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
@@ -48,30 +53,41 @@ export default function OnboardPage() {
 
   const canSave = isConnected && username.trim().length > 1;
 
-  function saveProfile() {
+  async function saveProfile() {
     if (!canSave || !address) return;
     const uname = slugify(username);
-    const p: Profile & { address: string } = {
-      username: uname,
-      displayName: displayName.trim() || uname,
-      bio: bio.trim(),
-      avatar: avatar.trim(),
-      address,
-    };
     try {
-      const key = "bottips:profiles:v2";
-      const raw = localStorage.getItem(key);
-      const map = raw ? (JSON.parse(raw) as Record<string, any>) : {};
-      map[address.toLowerCase()] = p;
-      localStorage.setItem(key, JSON.stringify(map));
-      const ukey = "bottips:by-username";
-      const uraw = localStorage.getItem(ukey);
-      const umap = uraw ? (JSON.parse(uraw) as Record<string, any>) : {};
-      umap[uname] = p;
-      localStorage.setItem(ukey, JSON.stringify(umap));
-    } catch {}
-    setProfile({ username: uname, displayName: displayName.trim() || uname, bio: bio.trim(), avatar: avatar.trim() });
-    setSaved(true);
+      const contracts = getNetwork(chainId);
+      await writeContractAsync({
+        address: contracts.contract as `0x${string}`,
+        abi: payAbi,
+        functionName: "register",
+        args: [uname, displayName.trim() || uname, bio.trim()],
+      });
+      const p: Profile & { address: string } = {
+        username: uname,
+        displayName: displayName.trim() || uname,
+        bio: bio.trim(),
+        avatar: avatar.trim(),
+        address,
+      };
+      try {
+        const key = "bottips:profiles:v2";
+        const raw = localStorage.getItem(key);
+        const map = raw ? (JSON.parse(raw) as Record<string, any>) : {};
+        map[address.toLowerCase()] = p;
+        localStorage.setItem(key, JSON.stringify(map));
+        const ukey = "bottips:by-username";
+        const uraw = localStorage.getItem(ukey);
+        const umap = uraw ? (JSON.parse(uraw) as Record<string, any>) : {};
+        umap[uname] = p;
+        localStorage.setItem(ukey, JSON.stringify(umap));
+      } catch {}
+      setProfile(p);
+      setSaved(true);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   const link = profile ? `${typeof window !== "undefined" ? window.location.origin : ""}/c/${profile.username}` : "";

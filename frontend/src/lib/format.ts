@@ -1,5 +1,5 @@
 import { formatUnits, type Address } from "viem";
-import { NATIVE_TOKEN } from "./types";
+
 
 export const TOKEN_DECIMALS: Record<string, number> = {
   native: 18,
@@ -12,7 +12,7 @@ export function shortenAddress(address?: string, size = 4): string {
 }
 
 export function isNative(token: Address): boolean {
-  return token === NATIVE_TOKEN;
+  return token === "0x0000000000000000000000000000000000000000";
 }
 
 export function tokenLabel(token: Address, usdt: Address): string {
