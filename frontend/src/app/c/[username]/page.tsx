@@ -40,10 +40,16 @@ export default function TipPage() {
 
   useEffect(() => {
     try {
-      const key = "bottips:profiles";
+      const key = "bottips:profiles:v2";
       const raw = localStorage.getItem(key);
       const map = raw ? (JSON.parse(raw) as Record<string, Profile & { address: string }>) : {};
-      const p = map[username];
+      let p = Object.values(map).find((x:any)=>x.username===username) as any;
+      if (!p) {
+        const ukey = "bottips:by-username";
+        const uraw = localStorage.getItem(ukey);
+        const umap = uraw ? (JSON.parse(uraw) as Record<string, Profile & { address: string }>) : {};
+        p = umap[username];
+      }
       if (p) setProfile(p);
     } catch {}
   }, [username]);

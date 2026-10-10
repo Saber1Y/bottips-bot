@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { CheckCircle2, ArrowRight } from "lucide-react";
@@ -32,6 +32,20 @@ export default function OnboardPage() {
   const [saved, setSaved] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
 
+  useEffect(() => {
+    if (!isConnected || !address) return;
+    try {
+      const key = "bottips:profiles:v2";
+      const raw = localStorage.getItem(key);
+      const map = raw ? (JSON.parse(raw) as Record<string, any>) : {};
+      const existing = map[address.toLowerCase()];
+      if (existing) {
+        setProfile(existing);
+        setSaved(true);
+      }
+    } catch {}
+  }, [isConnected, address]);
+
   const canSave = isConnected && username.trim().length > 1;
 
   function saveProfile() {
@@ -45,11 +59,16 @@ export default function OnboardPage() {
       address,
     };
     try {
-      const key = "bottips:profiles";
+      const key = "bottips:profiles:v2";
       const raw = localStorage.getItem(key);
       const map = raw ? (JSON.parse(raw) as Record<string, any>) : {};
-      map[uname] = p;
+      map[address.toLowerCase()] = p;
       localStorage.setItem(key, JSON.stringify(map));
+      const ukey = "bottips:by-username";
+      const uraw = localStorage.getItem(ukey);
+      const umap = uraw ? (JSON.parse(uraw) as Record<string, any>) : {};
+      umap[uname] = p;
+      localStorage.setItem(ukey, JSON.stringify(umap));
     } catch {}
     setProfile({ username: uname, displayName: displayName.trim() || uname, bio: bio.trim(), avatar: avatar.trim() });
     setSaved(true);
